@@ -9,6 +9,8 @@ import { StatusCodes } from "http-status-codes";
 const serverUrl = 'https://vr-fashion-backend.vercel.app/api';
 // const serverUrl = 'https://vrfashion.site/api';
 
+// console.log('serverUrl', serverUrl);
+
 const errorCodes = [
   StatusCodes.INTERNAL_SERVER_ERROR,
   StatusCodes.BAD_REQUEST,
