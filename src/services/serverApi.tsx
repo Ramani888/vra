@@ -316,3 +316,15 @@ export const serverRefundPayment = async (paymentId: string, payment: number) =>
   const res = await serverRequest('/refund/payment', 'POST', {paymentId, payment}, true);
   return res
 }
+
+
+////////// Setting Api //////////
+export const serverUpdatePaymentMethod = async (isCashOnDelivery: boolean) => {
+  const res = await serverRequest(`/payment/method?isCashOnDelivery=${isCashOnDelivery}`, 'PUT', null, true);
+  return res;
+}
+
+export const serverGetPaymentMethod = async () => {
+  const res = await serverRequest('/payment/method', 'GET', null, true);
+  return res;
+}

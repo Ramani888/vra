@@ -11,12 +11,15 @@ import Tooltip from '@mui/material/Tooltip';
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
+import Switch from '@mui/material/Switch';
 import { useNavigate } from 'react-router-dom';
+import { serverGetPaymentMethod, serverUpdatePaymentMethod } from '../../services/serverApi';
 
 const AccountMenu = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [adminData, setAdminData] = React.useState<any>(null);
+  const [codEnabled, setCodEnabled] = React.useState<boolean>(true);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -30,9 +33,42 @@ const AccountMenu = () => {
     navigate('/Login')
   }
 
+  const handleUpdatePaymentMethod = async (enabled: boolean) => {
+    try {
+      await serverUpdatePaymentMethod(enabled);
+    } catch (error) {
+      console.error('Error updating payment method:', error);
+    }
+  }
+
+  const handleCodToggle = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    setCodEnabled(checked);
+    await handleUpdatePaymentMethod(checked);
+  };
+
+  const getPaymentMethodData = async () => {
+    try {
+      const response = await serverGetPaymentMethod();
+      return response;
+    } catch (error) {
+      console.error('Error fetching payment method data:', error);
+      return null;
+    }
+  }
+
   React.useEffect(() => {
     const res: any = localStorage.getItem("Admin");
-    setAdminData(JSON.parse(res))
+    setAdminData(JSON.parse(res));
+
+    // Fetch payment method status from backend
+    const fetchPaymentMethod = async () => {
+      const res = await getPaymentMethodData();
+      if (res && typeof res?.data?.isCashOnDelivery === 'boolean') {
+        setCodEnabled(res?.data?.isCashOnDelivery);
+      }
+    };
+    fetchPaymentMethod();
   }, [])
 
   return (
@@ -88,6 +124,18 @@ const AccountMenu = () => {
       >
         <MenuItem>
         <Avatar sx={{ width: 32, height: 32, background: '#1876d1', color: '#ffffff', fontWeight: 'bold', textTransform: 'capitalize' }}>{adminData?.email[0]}</Avatar> {adminData?.email}
+        </MenuItem>
+        <Divider />
+        <MenuItem>
+          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            <Typography sx={{ flexGrow: 1 }}>Cash on Delivery</Typography>
+            <Switch
+              checked={codEnabled}
+              onChange={handleCodToggle}
+              color="primary"
+              inputProps={{ 'aria-label': 'cash on delivery switch' }}
+            />
+          </Box>
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleLogout}>
